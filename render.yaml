@@ -16,3 +16,5 @@ services:
         fromDatabase:
           name: database1
           property: connectionString
+      - key: SECRET_KEY_BASE
+        sync: false
