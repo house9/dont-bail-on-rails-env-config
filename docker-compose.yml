@@ -1,0 +1,38 @@
+version: "3.8"
+services:
+  db:
+    image: postgres:15.4
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=development
+      - POSTGRES_DB=db_development
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    ports:
+      - 5450:5432
+    volumes:
+      - rails_dev:/var/lib/postgresql/data/pgdata
+  testdb:
+    image: postgres:15.4
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=test
+      - POSTGRES_DB=db_test
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    ports:
+      - 5451:5432
+    volumes:
+      - rails_test:/var/lib/postgresql/data/pgdata
+  redis:
+    image: redis:7.2-alpine
+    restart: always
+    ports:
+      - "6379:6379"
+    command: redis-server --save 20 1 --loglevel warning
+    volumes:
+      - redis:/data
+
+volumes:
+  rails_dev:
+  rails_test:
+  redis:
+    driver: local
