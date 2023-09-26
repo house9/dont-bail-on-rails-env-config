@@ -16,3 +16,5 @@ services:
         fromDatabase:
           name: database1
           property: connectionString
+      - key: RAILS_MASTER_KEY
+        value: 5ea87592e68b03f8ca86f353e5ebd0cb # real world: use sync: false and set in render.com directly
