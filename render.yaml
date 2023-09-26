@@ -1,0 +1,18 @@
+databases:
+  - name: database1
+    databaseName: db_database1
+    user: user_database1
+    plan: free
+
+services:
+  - type: web
+    name: web_app1
+    buildCommand: "./bin/render-build.sh"
+    startCommand: "bundle exec puma -C config/puma.rb"
+    plan: free
+    runtime: ruby
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: database1
+          property: connectionString
