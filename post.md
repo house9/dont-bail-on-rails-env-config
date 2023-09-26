@@ -63,7 +63,7 @@ Ultimately, the choice should align with your team's comfort level, deployment s
 
 **Security Best Practices:** Using environment variables aligns with the Twelve-Factor App methodology, promoting code and configuration separation.
 
-**Ease of Rotation:** Changing secrets, like API keys, is often simpler with environment variables than with the `credentials.yml.enc` file.
+**Ease of Rotation:** Changing secrets, like API keys, is often simpler with environment variables than with the `credentials.yml.enc` file. No need to commit changes and re-deploy your code, changes can be deployed at will.
 
 **External Configuration Management:** Some organizations with configuration management tools prefer environment variables as they fit into existing processes.
 
@@ -77,7 +77,7 @@ Ultimately, the choice should align with your team's comfort level, deployment s
 
 **Version Control Friendly:** The encrypted `credentials.yml.enc` file can be safely version controlled, helping in change tracking without revealing secrets.
 
-**Built-in Rails Support:** With Rails' native support, developers can easily manage encrypted credentials.
+**Built-in Rails Support:** With Rails' native support, developers can easily manage encrypted credentials. As new configuration is added to the application developers simply need to get the lastest code and now they have access to the new values. If using ENV each developer needs to manage their own `.env` files and keep them up to date manually.
 
 ## Concluding thoughts
 
@@ -85,17 +85,25 @@ Managing secrets effectively is paramount for the security and integrity of your
 
 ## Additional Notes
 
+### Ensuring your application has the needed configuration
+
 ### database credentials
 
-When using ENV to manage your secrets I prefer setting a `DATABASE_URL` ENV instead of keeping track of the database host, user and password in separate values. Example postgres url: `postgres://username:password@host:port/database_name`.
+When using ENV to manage your secrets I prefer setting a `DATABASE_URL` ENV instead of keeping track of the database host, user and password in separate values.
 
-Then in your `database.yml` file just specify the `url` value:
+Postgres database url has the following structure: `postgres://username:password@host:port/database_name`
+
+For example: `postgres://vinz:Clortho@localhost:5432/development_database`.
+
+Rails will automatically use `DATABASE_URL` and even merge it will settings in the `config/database.yml` file. For clarity you may want to explicity update the config file:
 
 ```
 production:
   <<: *default
   url: <%= ENV['DATABASE_URL'] %>
 ```
+
+See the rails guides for more detail: [Configuring a Database](https://guides.rubyonrails.org/configuring.html#configuring-a-database)
 
 ### Git and Secrets
 
@@ -120,4 +128,26 @@ The resolution depends on your secrets management choice:
   - Note: All new Rails apps have an entry in the credentials file for `secret_key_base`.
 - **ENV**:
   - Set the `SECRET_KEY_BASE` environment variable on your server or PaaS.
-  - You can use `bin/rails secret` to generate a value.
+  - You can use `bin/rails secret` to generate a new value.
+
+Certainly, here's a section at the end of your blog post that discusses missing configuration and includes code samples for returning `nil` vs. raising a `KeyError` for both `ENV` and `Rails.application.credentials`:
+
+### Handling Missing Configuration
+
+When dealing with missing configuration, you have the choice of whether to raise errors or, at the very least, log the absence of configuration settings. In my practice, I tend to favor raising errors because in a production environment, the absence of essential configuration can lead to undesirable behavior.
+
+- `credentials.yml`: missing configuration will return `nil` by default or you can use the bang version `!` to raise an error
+
+```ruby
+# Assuming credentials.yml does not contain 'some_api_key'
+Rails.application.credentials.some_api_key # => nil
+Rails.application.credentials.some_api_key! # => :some_api_key is blank (KeyError)
+```
+
+- `ENV`: ENV is a Hash like object and has a `fetch` method which can be used to ensure configuration is set
+
+```ruby
+# Assuming the environment variable is not set
+ENV['SOME_API_KEY'] # => nil
+ENV.fetch('SOME_API_KEY') # => key not found: "SOME_API_KEY" (KeyError)
+```
