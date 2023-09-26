@@ -85,8 +85,6 @@ Managing secrets effectively is paramount for the security and integrity of your
 
 ## Additional Notes
 
-### Ensuring your application has the needed configuration
-
 ### database credentials
 
 When using ENV to manage your secrets I prefer setting a `DATABASE_URL` ENV instead of keeping track of the database host, user and password in separate values.
